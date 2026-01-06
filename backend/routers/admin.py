@@ -1,0 +1,291 @@
+"""
+Admin Router - Admin-only endpoints for user management and analytics
+"""
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from pydantic import BaseModel
+from typing import List, Optional
+
+from backend.database import get_db
+from backend.models import User, Prediction, DiseaseHistory
+from backend.auth_utils import get_current_admin_user
+
+router = APIRouter(prefix="/admin", tags=["Admin"])
+
+
+class UserStats(BaseModel):
+    total_users: int
+    active_users: int
+    admin_users: int
+    total_predictions: int
+    unique_diseases_detected: int
+
+
+class DiseaseStats(BaseModel):
+    disease_name: str
+    total_detections: int
+    avg_confidence: float
+    early_stage_count: int
+    mid_stage_count: int
+    late_stage_count: int
+    crop_type: Optional[str] = None
+
+
+class UserInfo(BaseModel):
+    id: int
+    email: str
+    username: str
+    full_name: Optional[str]
+    is_admin: bool
+    is_active: bool
+    prediction_count: int
+    created_at: str
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/stats", response_model=UserStats)
+def get_system_stats(
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get overall system statistics"""
+    
+    total_users = db.query(func.count(User.id)).scalar()
+    active_users = db.query(func.count(User.id)).filter(User.is_active == True).scalar()
+    admin_users = db.query(func.count(User.id)).filter(User.is_admin == True).scalar()
+    total_predictions = db.query(func.count(Prediction.id)).scalar()
+    unique_diseases = db.query(func.count(func.distinct(Prediction.disease_name))).filter(
+        Prediction.is_unknown == False
+    ).scalar() or 0
+    
+    return {
+        "total_users": total_users,
+        "active_users": active_users,
+        "admin_users": admin_users,
+        "total_predictions": total_predictions,
+        "unique_diseases_detected": unique_diseases
+    }
+
+
+@router.get("/diseases", response_model=List[DiseaseStats])
+def get_disease_statistics(
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get statistics for all detected diseases"""
+    
+    diseases = db.query(DiseaseHistory).order_by(
+        DiseaseHistory.total_detections.desc()
+    ).all()
+    
+    return diseases
+
+
+@router.get("/users", response_model=List[UserInfo])
+def get_all_users(
+    skip: int = 0,
+    limit: int = 50,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users with their prediction counts"""
+    
+    users = db.query(
+        User,
+        func.count(Prediction.id).label('prediction_count')
+    ).outerjoin(
+        Prediction, User.id == Prediction.user_id
+    ).group_by(User.id).offset(skip).limit(limit).all()
+    
+    result = []
+    for user, pred_count in users:
+        result.append({
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "full_name": user.full_name,
+            "is_admin": user.is_admin,
+            "is_active": user.is_active,
+            "prediction_count": pred_count or 0,
+            "created_at": user.created_at.isoformat() if user.created_at else None
+        })
+    
+    return result
+
+
+@router.get("/users/{user_id}", response_model=UserInfo)
+def get_user_details(
+    user_id: int,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get detailed information about a specific user"""
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    pred_count = db.query(func.count(Prediction.id)).filter(
+        Prediction.user_id == user_id
+    ).scalar()
+    
+    return {
+        "id": user.id,
+        "email": user.email,
+        "username": user.username,
+        "full_name": user.full_name,
+        "is_admin": user.is_admin,
+        "is_active": user.is_active,
+        "prediction_count": pred_count or 0,
+        "created_at": user.created_at.isoformat() if user.created_at else None
+    }
+
+
+@router.put("/users/{user_id}/activate")
+def activate_user(
+    user_id: int,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Activate a user account"""
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    user.is_active = True
+    db.commit()
+    
+    return {"message": "User activated successfully"}
+
+
+@router.put("/users/{user_id}/deactivate")
+def deactivate_user(
+    user_id: int,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Deactivate a user account"""
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot deactivate your own account"
+        )
+    
+    user.is_active = False
+    db.commit()
+    
+    return {"message": "User deactivated successfully"}
+
+
+@router.put("/users/{user_id}/make-admin")
+def make_admin(
+    user_id: int,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Grant admin privileges to a user"""
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    user.is_admin = True
+    db.commit()
+    
+    return {"message": "Admin privileges granted"}
+
+
+@router.get("/predictions")
+def get_all_predictions(
+    skip: int = 0,
+    limit: int = 50,
+    disease_name: Optional[str] = None,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get all predictions (admin view)"""
+    
+    query = db.query(Prediction)
+    
+    if disease_name:
+        query = query.filter(Prediction.disease_name == disease_name)
+    
+    predictions = query.order_by(
+        Prediction.created_at.desc()
+    ).offset(skip).limit(limit).all()
+    
+    return predictions
+
+
+@router.post("/train")
+async def train_new_disease(
+    disease_name: str = Form(...),
+    files: List[UploadFile] = File(...),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Train the model on a new disease class (Admin Only).
+    Workflow:
+    1. Save uploaded images to data/fewshot/train/{disease_name}
+    2. Trigger MLService to re-compute prototypes
+    """
+    import os
+    import shutil
+    from backend.config import settings
+    from backend.ml_service import ml_service
+
+    # 1. Prepare Directory
+    # Sanitize disease name (simple alphanumeric check or replace spaces)
+    safe_name = "".join(c for c in disease_name if c.isalnum() or c in (' ', '_', '-')).strip()
+    class_dir = os.path.join(settings.TRAIN_DATA_DIR, safe_name)
+    
+    if os.path.exists(class_dir):
+        # Optional: Decide if we want to add to existing or error out
+        # For now, let's allow adding to existing
+        pass
+    else:
+        os.makedirs(class_dir)
+
+    saved_count = 0
+    for file in files:
+        if file.filename:
+            file_path = os.path.join(class_dir, file.filename)
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            saved_count += 1
+    
+    if saved_count == 0:
+        raise HTTPException(status_code=400, detail="No valid files saved.")
+
+    # 2. Trigger Retraining
+    try:
+        ml_service.retrain_model()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Training failed: {str(e)}")
+
+    return {
+        "message": f"Successfully trained new disease: {safe_name}",
+        "images_added": saved_count,
+        "total_classes": len(ml_service.class_names)
+    }

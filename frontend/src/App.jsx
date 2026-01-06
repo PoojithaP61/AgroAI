@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import History from './pages/History'
 import PredictionDetail from './pages/PredictionDetail'
+import AdminDashboard from './pages/AdminDashboard'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
@@ -42,6 +43,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="history" element={<History />} />
               <Route path="prediction/:id" element={<PredictionDetail />} />
+              <Route path="admin/dashboard" element={<AdminDashboard />} />
             </Route>
           </Routes>
           <Toaster position="top-right" />

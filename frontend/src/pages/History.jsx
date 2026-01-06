@@ -7,6 +7,10 @@ import toast from 'react-hot-toast'
 export default function History() {
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filterStatus, setFilterStatus] = useState('all') // all, healthy, diseased, unknown
+  const [filterCrop, setFilterCrop] = useState('all')
+  const [sortBy, setSortBy] = useState('newest') // newest, oldest
 
   useEffect(() => {
     fetchHistory()
@@ -23,6 +27,9 @@ export default function History() {
     }
   }
 
+  // Get unique crop types
+  const uniqueCropTypes = ['all', ...new Set(predictions.map(p => p.crop_type).filter(Boolean))]
+
   const getStatusIcon = (prediction) => {
     if (prediction.is_unknown) {
       return <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
@@ -36,6 +43,26 @@ export default function History() {
     }
     return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
   }
+
+  const filteredPredictions = predictions
+    .filter(prediction => {
+      // Status Filter
+      if (filterStatus !== 'all') {
+        if (filterStatus === 'unknown' && !prediction.is_unknown) return false
+        if (filterStatus === 'healthy' && (prediction.is_unknown || !prediction.disease_name.toLowerCase().includes('healthy'))) return false
+        if (filterStatus === 'diseased' && (prediction.is_unknown || prediction.disease_name.toLowerCase().includes('healthy'))) return false
+      }
+
+      // Crop Type Filter
+      if (filterCrop !== 'all' && prediction.crop_type !== filterCrop) return false
+
+      return true
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at)
+      const dateB = new Date(b.created_at)
+      return sortBy === 'newest' ? dateB - dateA : dateA - dateB
+    })
 
   if (loading) {
     return (
@@ -55,34 +82,123 @@ export default function History() {
           <p className="text-gray-600 dark:text-gray-400">View and track your crop health analysis results</p>
         </div>
 
-        {/* Placeholder for future filter controls */}
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+        <div className="relative">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-surface border rounded-lg transition-colors ${showFilters
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400 ring-2 ring-primary-100 dark:ring-primary-900/30'
+              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+          >
             <Filter className="w-4 h-4" />
             <span>Filter</span>
           </button>
+
+          {showFilters && (
+            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-4 z-20 animate-in fade-in slide-in-from-top-2">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 block uppercase tracking-wider">Status</label>
+                  <div className="space-y-1">
+                    {['all', 'healthy', 'diseased', 'unknown'].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => setFilterStatus(status)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${filterStatus === status
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                      >
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {uniqueCropTypes.length > 1 && (
+                  <>
+                    <div className="h-px bg-gray-100 dark:bg-gray-700" />
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 block uppercase tracking-wider">Crop Type</label>
+                      <div className="space-y-1 max-h-40 overflow-y-auto">
+                        {uniqueCropTypes.map((crop) => (
+                          <button
+                            key={crop}
+                            onClick={() => setFilterCrop(crop)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${filterCrop === crop
+                              ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                              }`}
+                          >
+                            {crop === 'all' ? 'All Crops' : crop}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="h-px bg-gray-100 dark:bg-gray-700" />
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 block uppercase tracking-wider">Sort By</label>
+                  <div className="space-y-1">
+                    {[
+                      { value: 'newest', label: 'Date (Newest)' },
+                      { value: 'oldest', label: 'Date (Oldest)' }
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setSortBy(option.value)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${sortBy === option.value
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {predictions.length === 0 ? (
+      {filteredPredictions.length === 0 ? (
         <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-12 text-center transition-colors">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 dark:bg-gray-800 mb-6">
-            <Calendar className="w-10 h-10 text-gray-400" />
+            <Search className="w-10 h-10 text-gray-400" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No predictions yet</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No predictions found</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            Your diagnosis history will appear here once you analyze your first plant image.
+            {predictions.length === 0
+              ? "Your diagnosis history will appear here once you analyze your first plant image."
+              : "No predictions match your current filter settings."}
           </p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all"
-          >
-            Start Diagnosis
-          </Link>
+          {predictions.length === 0 ? (
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all"
+            >
+              Start Diagnosis
+            </Link>
+          ) : (
+            <button
+              onClick={() => {
+                setFilterStatus('all')
+                setFilterCrop('all')
+              }}
+              className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-4">
-          {predictions.map((prediction) => (
+          {filteredPredictions.map((prediction) => (
             <Link
               key={prediction.id}
               to={`/prediction/${prediction.id}`}

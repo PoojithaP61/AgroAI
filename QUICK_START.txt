@@ -1,0 +1,100 @@
+================================================================================
+  AGROAI BACKEND - EXACT COMMANDS TO RUN (COPY & PASTE)
+================================================================================
+
+📍 DIRECTORY: You MUST be in this directory:
+   C:\Users\pooji\OneDrive\Desktop\AgroAI_FinalYear_Project
+
+================================================================================
+  METHOD 1: EASIEST - Use the Batch File (Double-click or run in terminal)
+================================================================================
+
+Just double-click: start_backend.bat
+
+OR run in PowerShell:
+   .\start_backend.bat
+
+================================================================================
+  METHOD 2: Manual Steps (Copy each command one by one)
+================================================================================
+
+STEP 1: Open PowerShell or Command Prompt
+
+STEP 2: Navigate to project (COPY THIS EXACT LINE):
+   cd C:\Users\pooji\OneDrive\Desktop\AgroAI_FinalYear_Project
+
+STEP 3: Activate virtual environment (COPY THIS EXACT LINE):
+   .\finalenv\Scripts\Activate.ps1
+
+   (If that doesn't work, try: finalenv\Scripts\activate)
+
+STEP 4: Install dependencies - ONLY IF FIRST TIME (COPY THIS EXACT LINE):
+   pip install -r requirements.txt
+
+STEP 5: Start server (COPY THIS EXACT LINE):
+   python backend\start.py
+
+================================================================================
+  METHOD 3: Using uvicorn directly
+================================================================================
+
+After Steps 1-4 above, run:
+   uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
+
+================================================================================
+  EXPECTED OUTPUT (When server starts successfully):
+================================================================================
+
+🚀 Starting AgroAI Backend...
+📦 Initializing database...
+✅ Database initialized
+🤖 Initializing ML models...
+✅ ML models loaded successfully
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process
+INFO:     Started server process
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+
+================================================================================
+  ACCESS THE API:
+================================================================================
+
+Once running, open your browser:
+   - API Documentation: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/health
+   - Root: http://localhost:8000
+
+================================================================================
+  COMMON ERRORS & FIXES:
+================================================================================
+
+ERROR: "ModuleNotFoundError: No module named 'fastapi'"
+FIX: Make sure you activated virtual environment (Step 3)
+     You should see (finalenv) at start of your prompt
+
+ERROR: "No module named 'backend'"
+FIX: Make sure you're in the project root directory (Step 2)
+     Run: cd C:\Users\pooji\OneDrive\Desktop\AgroAI_FinalYear_Project
+
+ERROR: "Cannot activate virtual environment"
+FIX: Try running PowerShell as Administrator
+     Or recreate venv: python -m venv finalenv
+
+ERROR: "Port 8000 already in use"
+FIX: Kill the process using port 8000, or change port in backend/start.py
+
+ERROR: "ML models failed to initialize"
+FIX: This is OK! Server will still run, but prediction endpoints won't work
+     Make sure ml/encoder/encoder_supcon.pth exists
+
+================================================================================
+  ALL COMMANDS IN ONE BLOCK (Copy all at once):
+================================================================================
+
+cd C:\Users\pooji\OneDrive\Desktop\AgroAI_FinalYear_Project
+.\finalenv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python backend\start.py
+
+================================================================================

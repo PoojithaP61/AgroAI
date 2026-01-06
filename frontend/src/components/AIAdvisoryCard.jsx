@@ -1,4 +1,5 @@
 import { Bot, Sparkles, AlertTriangle } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 
 export default function AIAdvisoryCard({ advisory, loading }) {
     if (loading) {
@@ -30,10 +31,10 @@ export default function AIAdvisoryCard({ advisory, loading }) {
                     </h3>
                 </div>
 
-                <div className="prose prose-indigo dark:prose-invert max-w-none text-indigo-900 dark:text-indigo-100">
-                    <div className="whitespace-pre-wrap leading-relaxed">
+                <div className="prose prose-indigo dark:prose-invert max-w-none prose-headings:font-bold prose-headings:text-indigo-900 dark:prose-headings:text-indigo-100 prose-p:text-indigo-900/80 dark:prose-p:text-indigo-100/80 prose-li:text-indigo-900/80 dark:prose-li:text-indigo-100/80 prose-strong:text-indigo-900 dark:prose-strong:text-indigo-100">
+                    <ReactMarkdown>
                         {advisory}
-                    </div>
+                    </ReactMarkdown>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-indigo-200 dark:border-indigo-800 flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400">

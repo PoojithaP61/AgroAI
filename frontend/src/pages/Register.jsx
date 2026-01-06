@@ -9,6 +9,7 @@ export default function Register() {
     email: '',
     username: '',
     password: '',
+    confirmPassword: '',
     full_name: '',
     phone: ''
   })
@@ -22,10 +23,18 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+
     setLoading(true)
 
     try {
-      await register(formData)
+      // Exclude confirmPassword from data sent to backend
+      const { confirmPassword, ...registrationData } = formData
+      await register(registrationData)
       toast.success('Registration successful! Please login.')
       navigate('/login')
     } catch (error) {
@@ -103,6 +112,21 @@ export default function Register() {
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Create a password"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password *
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="Confirm your password"
             />
           </div>
 

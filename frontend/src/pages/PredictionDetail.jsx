@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, AlertTriangle, CheckCircle, XCircle, Image as ImageIcon, Calendar, Droplets, ThermometerSun, Activity, MapPin, FileText, Layers } from 'lucide-react'
+import { ArrowLeft, AlertTriangle, CheckCircle, Image as ImageIcon, Calendar, MapPin, FileText, Layers } from 'lucide-react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 import AIAdvisoryCard from '../components/AIAdvisoryCard'
@@ -10,6 +10,7 @@ export default function PredictionDetail() {
   const [prediction, setPrediction] = useState(null)
   const [loading, setLoading] = useState(true)
   const [gradcamUrl, setGradcamUrl] = useState(null)
+  const [imageUrl, setImageUrl] = useState(null)
 
   useEffect(() => {
     fetchPrediction()
@@ -19,6 +20,16 @@ export default function PredictionDetail() {
     try {
       const response = await api.get(`/diagnosis/history/${id}`)
       setPrediction(response.data)
+
+      // Fetch uploaded image
+      try {
+        const imageResponse = await api.get(`/diagnosis/image/${id}`, {
+          responseType: 'blob'
+        })
+        setImageUrl(URL.createObjectURL(imageResponse.data))
+      } catch (error) {
+        console.error('Failed to load uploaded image:', error)
+      }
 
       if (response.data.gradcam_path) {
         try {
@@ -35,6 +46,21 @@ export default function PredictionDetail() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const getStageColor = (stage) => {
+    switch (stage) {
+      case 'Early': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+      case 'Mid': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+      case 'Late': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+    }
+  }
+
+  const getConfidenceLevel = (score) => {
+    if (score > 0.9) return { label: 'High Confidence', color: 'text-green-600 dark:text-green-400' }
+    if (score > 0.7) return { label: 'Moderate Confidence', color: 'text-yellow-600 dark:text-yellow-400' }
+    return { label: 'Low Confidence', color: 'text-red-600 dark:text-red-400' }
   }
 
   if (loading) {
@@ -62,21 +88,6 @@ export default function PredictionDetail() {
         </Link>
       </div>
     )
-  }
-
-  const getStageColor = (stage) => {
-    switch (stage) {
-      case 'Early': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-      case 'Mid': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-      case 'Late': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-    }
-  }
-
-  const getConfidenceLevel = (score) => {
-    if (score > 0.9) return { label: 'High Confidence', color: 'text-green-600 dark:text-green-400' }
-    if (score > 0.7) return { label: 'Moderate Confidence', color: 'text-yellow-600 dark:text-yellow-400' }
-    return { label: 'Low Confidence', color: 'text-red-600 dark:text-red-400' }
   }
 
   return (
@@ -131,12 +142,18 @@ export default function PredictionDetail() {
                 {/* Original Image */}
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Analyzed Image</p>
-                  {/* In a real app, serve from backend. Using placeholder or assuming same path logic */}
-                  <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    {/* Note: In a real environment, you'd need an endpoint to serve the image securely */}
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <ImageIcon className="w-12 h-12" />
-                    </div>
+                  <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-inner">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt="Uploaded Plant"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <ImageIcon className="w-12 h-12" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -170,7 +187,7 @@ export default function PredictionDetail() {
           </div>
 
           {/* AI Advisory Section (Prominent) */}
-          {prediction.ai_advisory && !prediction.is_unknown && (
+          {prediction.ai_advisory && !prediction.is_unknown && !prediction.disease_name.toLowerCase().includes('healthy') && (
             <AIAdvisoryCard advisory={prediction.ai_advisory} />
           )}
         </div>
@@ -215,14 +232,25 @@ export default function PredictionDetail() {
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Recommended Action</p>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
-                    <p className="text-blue-800 dark:text-blue-300 font-medium text-sm">
-                      {prediction.recommended_action}
+                {/* Only show recommendation if NOT healthy */}
+                {!prediction.disease_name.toLowerCase().includes('healthy') && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Recommended Action</p>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
+                      <p className="text-blue-800 dark:text-blue-300 font-medium text-sm">
+                        {prediction.recommended_action}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {prediction.disease_name.toLowerCase().includes('healthy') && (
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-lg">
+                    <p className="text-green-800 dark:text-green-300 font-medium text-sm text-center">
+                      🎉 Plant is healthy! No action needed.
                     </p>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>

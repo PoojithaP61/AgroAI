@@ -6,3 +6,9 @@ train_transform = transforms.Compose([
     transforms.RandomRotation(15),
     transforms.ToTensor()
 ])
+
+# Inference transform (no augmentation)
+inference_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor()
+])
