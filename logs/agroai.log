@@ -22,3 +22,6 @@
 2026-01-07 12:08:33,476 - backend.routers.diagnosis - INFO - File saved successfully: 1_bd4dfe91-5aa8-404c-b4f7-ea39ce8258b3.JPG
 2026-01-07 12:08:56,464 - backend.routers.diagnosis - INFO - File saved successfully: 1_e3413cdb-3700-4d32-8e6a-875d8fa90036.JPG
 2026-01-07 12:09:10,944 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 12:18:30,366 - root - INFO - 📝 Logging initialized successfully
+2026-01-07 12:19:01,374 - backend.routers.diagnosis - INFO - File saved successfully: 1_7de4463f-d287-4275-a963-6f617822b269.JPG
+2026-01-07 12:19:13,054 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
