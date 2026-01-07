@@ -8,6 +8,9 @@ import Dashboard from './pages/Dashboard'
 import History from './pages/History'
 import PredictionDetail from './pages/PredictionDetail'
 import AdminDashboard from './pages/AdminDashboard'
+import Verify from './pages/Verify'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
@@ -32,6 +35,9 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify" element={<Verify />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/"
               element={

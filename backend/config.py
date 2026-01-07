@@ -1,5 +1,8 @@
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Settings:
     """Application settings"""
@@ -41,7 +44,14 @@ class Settings:
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:8000",
+        "http://127.0.0.1:8000",
     ]
+    
+    # Email Settings
+    SMTP_SERVER: str = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    EMAIL_SENDER: Optional[str] = os.getenv("EMAIL_SENDER")
+    EMAIL_PASSWORD: Optional[str] = os.getenv("EMAIL_PASSWORD")
 
 
 settings = Settings()

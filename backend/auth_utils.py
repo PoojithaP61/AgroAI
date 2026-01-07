@@ -10,7 +10,15 @@ from backend.models import User
 from backend.config import settings
 
 # OAuth2 scheme
+# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login")
+
+
+def generate_verification_code(length: int = 6) -> str:
+    """Generate a random numeric verification code"""
+    import random
+    import string
+    return ''.join(random.choices(string.digits, k=length))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

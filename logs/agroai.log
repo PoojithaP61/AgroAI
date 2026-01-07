@@ -1,0 +1,24 @@
+2026-01-07 11:45:23,412 - root - INFO - 📝 Logging initialized successfully
+2026-01-07 11:45:41,970 - root - INFO - 📝 Logging initialized successfully
+2026-01-07 11:56:06,679 - root - INFO - 📝 Logging initialized successfully
+2026-01-07 11:56:59,739 - backend.routers.diagnosis - INFO - File saved successfully: 1_de0dfeda-a6e2-40c1-8776-6a9a4728a694.JPG
+2026-01-07 11:57:12,103 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 11:57:52,122 - backend.routers.diagnosis - INFO - File saved successfully: 1_cd0b344e-7e62-4b74-85ca-1830594cf507.JPG
+2026-01-07 11:58:04,283 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 11:58:34,815 - backend.routers.diagnosis - INFO - File saved successfully: 1_cbbc7cde-40b1-46f9-b270-7ebf5a3cb5f7.JPG
+2026-01-07 11:58:44,896 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 11:59:14,899 - backend.routers.diagnosis - INFO - File saved successfully: 1_756daac8-184d-476d-85ac-5a0dfa887201.JPG
+2026-01-07 11:59:27,065 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 11:59:48,324 - backend.routers.diagnosis - INFO - File saved successfully: 1_ac7b81f1-b6ec-4c19-badd-e1239ca0697d.JPG
+2026-01-07 12:00:02,079 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 12:00:28,176 - backend.routers.diagnosis - INFO - File saved successfully: 1_59c6b853-4596-4f8d-a175-81b24efd599f.JPG
+2026-01-07 12:00:44,899 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 12:01:44,841 - backend.routers.diagnosis - INFO - File saved successfully: 1_4e27441b-f7a5-4472-b767-3a191bf4de5e.JPG
+2026-01-07 12:02:01,222 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 12:02:45,098 - backend.routers.diagnosis - INFO - File saved successfully: 1_a5109961-32bb-4dc6-a4ca-b6fcc59dd3af.JPG
+2026-01-07 12:02:58,525 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-07 12:06:18,005 - root - INFO - 📝 Logging initialized successfully
+2026-01-07 12:07:50,704 - root - INFO - 📝 Logging initialized successfully
+2026-01-07 12:08:33,476 - backend.routers.diagnosis - INFO - File saved successfully: 1_bd4dfe91-5aa8-404c-b4f7-ea39ce8258b3.JPG
+2026-01-07 12:08:56,464 - backend.routers.diagnosis - INFO - File saved successfully: 1_e3413cdb-3700-4d32-8e6a-875d8fa90036.JPG
+2026-01-07 12:09:10,944 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"

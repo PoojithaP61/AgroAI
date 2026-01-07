@@ -12,7 +12,11 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from PIL import Image
 from pydantic import BaseModel
+from pydantic import BaseModel
 from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 from backend.database import get_db
 from backend.models import Prediction, DiseaseHistory
@@ -55,6 +59,7 @@ def save_uploaded_file(file: UploadFile, user_id: int) -> tuple[str, str]:
     # Generate unique filename
     file_ext = os.path.splitext(file.filename)[1]
     if file_ext.lower() not in settings.ALLOWED_EXTENSIONS:
+        logger.warning(f"Invalid file extension: {file_ext}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid file type. Allowed: {', '.join(settings.ALLOWED_EXTENSIONS)}"
@@ -63,16 +68,38 @@ def save_uploaded_file(file: UploadFile, user_id: int) -> tuple[str, str]:
     filename = f"{user_id}_{uuid.uuid4()}{file_ext}"
     file_path = os.path.join(settings.UPLOAD_DIR, filename)
     
-    # Save file
-    with open(file_path, "wb") as buffer:
-        content = file.file.read()
-        if len(content) > settings.MAX_UPLOAD_SIZE:
+    try:
+        # Save file directly
+        with open(file_path, "wb") as buffer:
+            content = file.file.read()
+            if len(content) > settings.MAX_UPLOAD_SIZE:
+                logger.warning("File too large upload attempt")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File too large. Max size: {settings.MAX_UPLOAD_SIZE / 1024 / 1024}MB"
+                )
+            buffer.write(content)
+            
+        # Verify it's a real image using PIL
+        try:
+            with Image.open(file_path) as img:
+                img.verify()
+        except Exception:
+            logger.error(f"Invalid image file uploaded: {file.filename}")
+            if os.path.exists(file_path):
+                os.remove(file_path)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"File too large. Max size: {settings.MAX_UPLOAD_SIZE / 1024 / 1024}MB"
+                detail="Invalid image file. The file is corrupted or not a valid image."
             )
-        buffer.write(content)
+            
+    except Exception as e:
+        logger.error(f"File upload error: {str(e)}")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise e
     
+    logger.info(f"File saved successfully: {filename}")
     return file_path, filename
 
 

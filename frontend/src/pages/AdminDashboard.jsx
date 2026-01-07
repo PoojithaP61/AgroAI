@@ -5,6 +5,8 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
+import DiseaseChart from '../components/DiseaseChart'
+
 export default function AdminDashboard() {
     const { user } = useAuth()
     const navigate = useNavigate()
@@ -13,6 +15,7 @@ export default function AdminDashboard() {
     const [files, setFiles] = useState([])
     const [training, setTraining] = useState(false)
     const [stats, setStats] = useState(null)
+    const [diseaseStats, setDiseaseStats] = useState([])
     const [statsLoading, setStatsLoading] = useState(true)
 
     useEffect(() => {
@@ -27,8 +30,19 @@ export default function AdminDashboard() {
 
     const fetchStats = async () => {
         try {
-            const response = await api.get('/admin/stats')
-            setStats(response.data)
+            const [statsRes, diseasesRes] = await Promise.all([
+                api.get('/admin/stats'),
+                api.get('/admin/diseases')
+            ])
+            setStats(statsRes.data)
+
+            // Format for chart: { name: 'Tomato Blight', count: 15 }
+            const chartData = diseasesRes.data.map(d => ({
+                name: d.disease_name,
+                count: d.total_detections
+            }))
+            setDiseaseStats(chartData)
+
         } catch (error) {
             console.error("Failed to fetch stats", error)
         } finally {
@@ -150,8 +164,8 @@ export default function AdminDashboard() {
                                 type="submit"
                                 disabled={training}
                                 className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all ${training
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-primary-600 hover:bg-primary-700 hover:-translate-y-1 hover:shadow-xl'
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-primary-600 hover:bg-primary-700 hover:-translate-y-1 hover:shadow-xl'
                                     }`}
                             >
                                 {training ? (
@@ -210,6 +224,11 @@ export default function AdminDashboard() {
                                 </p>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Analytics Chart */}
+                    <div>
+                        <DiseaseChart data={diseaseStats} />
                     </div>
                 </div>
             </div>

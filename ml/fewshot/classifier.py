@@ -60,8 +60,11 @@ class PrototypeClassifier:
         best_label = max(similarities, key=similarities.get)
         best_score = similarities[best_label]
 
+        print(f"DEBUG: Best Class: {self.class_names[best_label]} | Score: {best_score:.4f} | Threshold: {threshold:.4f}")
+
         # Open-set rejection
         if best_score < threshold:
+            print(f"DEBUG: Rejected as UNKNOWN (Score {best_score:.4f} < {threshold:.4f})")
             return "UNKNOWN", float(best_score)
 
         return self.class_names[best_label], float(best_score)

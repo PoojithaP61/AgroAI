@@ -16,11 +16,30 @@ class User(Base):
     phone = Column(String(20))
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     predictions = relationship("Prediction", back_populates="user", cascade="all, delete-orphan")
+    verification_codes = relationship("VerificationCode", back_populates="user", cascade="all, delete-orphan")
+
+
+class VerificationCode(Base):
+    """Store verification codes for email/phone verification and password reset"""
+    __tablename__ = "verification_codes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    code = Column(String(10), nullable=False)
+    type = Column(String(20), nullable=False)  # "EMAIL_VERIFICATION", "PHONE_VERIFICATION", "PASSWORD_RESET"
+    via = Column(String(10), nullable=False)  # "EMAIL", "SMS"
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_used = Column(Boolean, default=False)
+
+    # Relationships
+    user = relationship("User", back_populates="verification_codes")
 
 
 class Prediction(Base):

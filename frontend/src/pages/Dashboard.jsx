@@ -5,10 +5,13 @@ import api from '../services/api'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
+import LoadingSteps from '../components/LoadingSteps'
+
 export default function Dashboard() {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [currentStep, setCurrentStep] = useState(1)
   const [cropType, setCropType] = useState('')
   const [location, setLocation] = useState('')
   const navigate = useNavigate()
@@ -39,6 +42,13 @@ export default function Dashboard() {
     }
 
     setLoading(true)
+    setCurrentStep(1)
+
+    // Simulate progress while waiting for real API
+    const progressInterval = setInterval(() => {
+      setCurrentStep(prev => (prev < 3 ? prev + 1 : prev))
+    }, 1500)
+
     const formData = new FormData()
     formData.append('file', file)
     if (cropType) formData.append('crop_type', cropType)
@@ -48,12 +58,20 @@ export default function Dashboard() {
       const response = await api.post('/diagnosis/predict', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      toast.success('Disease detected successfully!')
-      navigate(`/prediction/${response.data.prediction_id}`)
+
+      clearInterval(progressInterval)
+      setCurrentStep(4) // Generating Advisory
+
+      // Small delay to show the final step completion
+      setTimeout(() => {
+        toast.success('Disease detected successfully!')
+        navigate(`/prediction/${response.data.prediction_id}`)
+      }, 800)
+
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Prediction failed')
-    } finally {
+      clearInterval(progressInterval)
       setLoading(false)
+      toast.error(error.response?.data?.detail || 'Prediction failed')
     }
   }
 
@@ -167,23 +185,20 @@ export default function Dashboard() {
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading || !file}
-            className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader className="w-6 h-6 animate-spin" />
-                Analyzing Plant Health...
-              </>
-            ) : (
-              <>
-                <ImageIcon className="w-6 h-6" />
-                Analyze Image
-              </>
-            )}
-          </button>
+          {loading ? (
+            <div className="mt-6">
+              <LoadingSteps currentStep={currentStep} />
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={!file}
+              className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+            >
+              <ImageIcon className="w-6 h-6" />
+              Analyze Image
+            </button>
+          )}
         </form>
 
         {/* Info Box */}

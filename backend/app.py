@@ -10,12 +10,14 @@ from backend.config import settings
 from backend.database import init_db
 from backend.ml_service import ml_service
 from backend.routers import auth, diagnosis, admin
+from backend.logging_config import setup_logging
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan events: startup and shutdown"""
     # Startup
+    setup_logging()
     print("🚀 Starting AgroAI Backend...")
     
     # Initialize database

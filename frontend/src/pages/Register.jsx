@@ -35,8 +35,8 @@ export default function Register() {
       // Exclude confirmPassword from data sent to backend
       const { confirmPassword, ...registrationData } = formData
       await register(registrationData)
-      toast.success('Registration successful! Please login.')
-      navigate('/login')
+      toast.success('Registration successful! Please verify your email.')
+      navigate('/verify', { state: { email: formData.email } })
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Registration failed')
     } finally {
@@ -132,7 +132,7 @@ export default function Register() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone
+              Phone Number
             </label>
             <input
               type="tel"
@@ -140,7 +140,7 @@ export default function Register() {
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Enter your phone number"
+              placeholder="Enter your phone number (optional)"
             />
           </div>
 
@@ -166,7 +166,7 @@ export default function Register() {
             Sign in
           </Link>
         </p>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
