@@ -62,9 +62,20 @@ class PrototypeClassifier:
 
         print(f"DEBUG: Best Class: {self.class_names[best_label]} | Score: {best_score:.4f} | Threshold: {threshold:.4f}")
 
-        # Open-set rejection
+        # Open-set rejection / Ambiguity Check
+        
+        # 1. Absolute Threshold Check
         if best_score < threshold:
             print(f"DEBUG: Rejected as UNKNOWN (Score {best_score:.4f} < {threshold:.4f})")
             return "UNKNOWN", float(best_score)
+
+        # 2. Ambiguity Check (Top-1 vs Top-2 Margin)
+        # If the model is confused between two classes, it might be an unknown disease sharing features
+        sorted_scores = sorted(similarities.values(), reverse=True)
+        if len(sorted_scores) > 1:
+            margin = sorted_scores[0] - sorted_scores[1]
+            if margin < 0.01:  # If difference is less than 1%, it's ambiguous
+                 print(f"DEBUG: Rejected as UNKNOWN (Ambiguous Margin {margin:.4f})")
+                 return "UNKNOWN", float(best_score)
 
         return self.class_names[best_label], float(best_score)

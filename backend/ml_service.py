@@ -54,9 +54,10 @@ class MLService:
         
         # Compute open-set threshold
         print("Computing open-set threshold...")
-        # increased percentile from default 0.5 to 15.0 to filter unknown classes better
+        # Fine-tuning made clusters very tight, so we must lower the percentile 
+        # to avoid rejecting valid unseen data. Setting to 0.5 (virtually minimum)
         self.threshold = compute_open_set_threshold(
-            encoder_path, train_dir, self.device, percentile=15.0
+            encoder_path, train_dir, self.device, percentile=0.5
         )
         print(f"Open-set threshold: {self.threshold:.3f}")
         

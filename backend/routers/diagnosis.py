@@ -103,7 +103,7 @@ def save_uploaded_file(file: UploadFile, user_id: int) -> tuple[str, str]:
     return file_path, filename
 
 
-def generate_gradcam(image_path: str, disease_label: int, user_id: int) -> tuple[str, float]:
+def generate_gradcam(image_path: str, prototype: torch.Tensor, user_id: int) -> tuple[str, float]:
     """Generate Grad-CAM visualization and return (gradcam_path, cam_coverage)"""
     os.makedirs(settings.GRADCAM_OUTPUT_DIR, exist_ok=True)
     
@@ -123,11 +123,14 @@ def generate_gradcam(image_path: str, disease_label: int, user_id: int) -> tuple
     image = Image.open(image_path).convert("RGB")
     input_tensor = inference_transform(image).unsqueeze(0).to(device)
     
-    # Generate CAM (use label 0 for now, or find actual label)
-    cam = cam_generator.generate(input_tensor, class_idx=0)
+    # Generate CAM using prototype similarity
+    cam = cam_generator.generate_from_prototype(input_tensor, prototype)
+    
+    # Filter background noise (thresholding)
+    cam[cam < 0.4] = 0
     
     # Calculate coverage (percentage of image with high activation)
-    cam_coverage = float((cam > 0.3).sum() / cam.size)
+    cam_coverage = float((cam > 0.0).sum() / cam.size)
     
     # Create visualization
     img_array = np.array(image.resize((224, 224)))
@@ -183,8 +186,11 @@ async def predict_disease(
                     break
             
             if disease_label is not None:
+                # Retrieve the specific prototype for this class
+                prototype = ml_service.prototypes[disease_label]
+                
                 gradcam_path, cam_coverage = generate_gradcam(
-                    image_path, disease_label, current_user.id
+                    image_path, prototype, current_user.id
                 )
         
         # 3. Disease Intelligence Assessment
