@@ -33,19 +33,19 @@ export default function ForgotPassword() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+        <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95 transition-colors duration-300">
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
                         <KeyRound className="w-8 h-8 text-primary-600" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">Forgot Password</h1>
-                    <p className="text-gray-600 mt-2">Enter your email to reset password</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Forgot Password</h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-2">Enter your email to reset password</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Email Address
                         </label>
                         <div className="relative">
@@ -55,7 +55,7 @@ export default function ForgotPassword() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 transition-colors"
                                 placeholder="Enter your email"
                             />
                         </div>
@@ -75,7 +75,7 @@ export default function ForgotPassword() {
                 </form>
 
                 <div className="mt-6 text-center">
-                    <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900">
+                    <Link to="/login" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                         Back to Login
                     </Link>
                 </div>

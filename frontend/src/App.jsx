@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import GlobalBackground from './components/GlobalBackground'
 import History from './pages/History'
 import PredictionDetail from './pages/PredictionDetail'
 import AdminDashboard from './pages/AdminDashboard'
@@ -31,6 +32,7 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
+        <GlobalBackground />
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />

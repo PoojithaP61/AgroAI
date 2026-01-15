@@ -1,7 +1,6 @@
 import os
 from openai import OpenAI
 
-# Get API key from environment variable or config
 api_key = os.getenv("OPENAI_API_KEY", "")
 if not api_key:
     # Fallback to config if available

@@ -5,12 +5,7 @@ from ml.encoder import Encoder
 from ml.transforms import train_transform
 import os
 
-def compute_prototypes(
-    encoder_path,
-    data_dir,
-    device="cpu"
-):
-    # Load trained encoder
+def compute_prototypes(encoder_path,data_dir,device="cpu"):
     model = Encoder()
     model.load_state_dict(torch.load(encoder_path, map_location=device))
     model.to(device)
@@ -26,7 +21,6 @@ def compute_prototypes(
         for images, labels in loader:
             images = images.to(device)
             labels = labels.to(device)
-
             features = model(images)
 
             for feature, label in zip(features, labels):
@@ -38,7 +32,6 @@ def compute_prototypes(
                     prototypes[label] += feature
                     counts[label] += 1
 
-    # Average features to get prototypes
     for label in prototypes:
         prototypes[label] /= counts[label]
 
