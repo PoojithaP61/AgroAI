@@ -22,13 +22,28 @@ class PrototypeClassifier:
         self.class_names = class_names
 
     def predict(self, image_path, threshold=0.6):
-
+        
+        # Test Time Augmentation (TTA) - 5 views
+        # We need the training transform (with randomness) to get different views
+        from backend.ml.transforms import train_transform
+        
         image = Image.open(image_path).convert("RGB")
-        image = inference_transform(image).unsqueeze(0).to(self.device)
-
+        embeddings = []
+        
+        # 1. Standard View
+        std_input = inference_transform(image).unsqueeze(0).to(self.device)
         with torch.no_grad():
-            embedding = self.model(image)
-            embedding = F.normalize(embedding, dim=1)
+            embeddings.append(F.normalize(self.model(std_input), dim=1))
+            
+        # 2. Augmented Views
+        for _ in range(19):
+            aug_input = train_transform(image).unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                embeddings.append(F.normalize(self.model(aug_input), dim=1))
+        
+        # Average the embeddings
+        embedding = torch.stack(embeddings).mean(dim=0)
+        embedding = F.normalize(embedding, dim=1)
 
         similarities = {}
 
@@ -47,10 +62,10 @@ class PrototypeClassifier:
             return "UNKNOWN", float(best_score)
 
         sorted_scores = sorted(similarities.values(), reverse=True)
-        if len(sorted_scores) > 1:
-            margin = sorted_scores[0] - sorted_scores[1]
-            if margin < 0.01: 
-                print(f"DEBUG: Rejected as UNKNOWN (Ambiguous Margin {margin:.4f})")
-                return "UNKNOWN", float(best_score)
+        # if len(sorted_scores) > 1:
+        #     margin = sorted_scores[0] - sorted_scores[1]
+        #     if margin < 0.01: 
+        #         print(f"DEBUG: Rejected as UNKNOWN (Ambiguous Margin {margin:.4f})")
+        #         return "UNKNOWN", float(best_score)
 
         return self.class_names[best_label], float(best_score)

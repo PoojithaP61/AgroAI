@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 class Settings:    
     API_V1_PREFIX: str = "/api/v1"
@@ -19,6 +19,7 @@ class Settings:
     ALLOWED_EXTENSIONS: set = {".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG"}
     GRADCAM_OUTPUT_DIR: str = os.getenv("GRADCAM_OUTPUT_DIR", "data/processed/gradcam")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
     DEVICE: str = os.getenv("DEVICE", "cpu")
     CORS_ORIGINS: list = [
         "http://localhost:3000",

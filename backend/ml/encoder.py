@@ -3,12 +3,14 @@ import torch.nn as nn
 from torchvision import models
 
 class Encoder(nn.Module):
-    def __init__(self, embedding_dim=128):
+    def __init__(self, embedding_dim=256):
         super().__init__()
-        backbone = models.mobilenet_v3_small(weights="DEFAULT")
+        # Upgrading to Large for better capacity
+        backbone = models.mobilenet_v3_large(weights="DEFAULT")
         self.feature_extractor = backbone.features
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.embedding = nn.Linear(576, embedding_dim)
+        # MobileNetV3 Large has 960 output channels
+        self.embedding = nn.Linear(960, embedding_dim)
 
     def forward(self, x):
         x = self.feature_extractor(x)

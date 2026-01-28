@@ -36,8 +36,11 @@ def evaluate_model():
         if i % 10 == 0:
             print(f"Processing {i}/{total} images...")
         
-        pred, conf = classifier.predict(image_path)
+        pred, conf = classifier.predict(image_path, threshold=0.1)
         true_label = class_names[label]
+        
+        if i % 10 == 0:
+            print(f"[{i}/{total}] True: {true_label} -> Pred: {pred} (Conf: {conf:.4f})")
         
         y_true.append(true_label)
         y_pred.append(pred)

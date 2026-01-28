@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, Image as ImageIcon, Loader, AlertCircle, Sparkles, Sprout } from 'lucide-react'
+import { Upload, Image as ImageIcon, Loader, Sprout } from 'lucide-react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -79,10 +79,7 @@ export default function Dashboard() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-10 space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium">
-          <Sparkles className="w-4 h-4" />
-          <span>AI-Powered Diagnostics</span>
-        </div>
+
         <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl">
           Protect Your Crops
         </h1>
@@ -164,18 +161,8 @@ export default function Dashboard() {
           )}
         </form>
 
-        {/* Info Box */}
-        <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 flex items-start gap-4">
-          <AlertCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-800 dark:text-blue-200">
-            <p className="font-bold mb-1 text-base">Tips for accurate results:</p>
-            <ul className="list-disc list-inside space-y-1 opacity-90">
-              <li>Ensure the affected area is clearly visible and in focus</li>
-              <li>Avoid shadows or glare on the leaf surface</li>
-              <li>Capture the image against a neutral background if possible</li>
-            </ul>
-          </div>
-        </div>
+
+
       </div>
     </div>
   )

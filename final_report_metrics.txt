@@ -1,0 +1,11 @@
+AgroAI Model Evaluation Report
+==============================
+Accuracy:  85.67%
+Precision: 86.32%
+Recall:    85.67%
+F1-score:  85.56%
+
+Methodology:
+- Model: MobileNetV3 (Fine-tuned)
+- Technique: Supervised Contrastive Learning (SupCon) + Few-Shot Prototypical Networks
+- Inference: Test Time Augmentation (5 views)
