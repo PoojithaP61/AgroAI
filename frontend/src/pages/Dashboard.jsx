@@ -58,7 +58,6 @@ export default function Dashboard() {
       clearInterval(progressInterval)
       setCurrentStep(4) // Generating Advisory
 
-      // Small delay to show the final step completion
       setTimeout(() => {
         toast.success('Disease detected successfully!')
         navigate(`/prediction/${response.data.prediction_id}`)
@@ -84,7 +83,7 @@ export default function Dashboard() {
           Protect Your Crops
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Upload a photo of your plant to instantly detect diseases and get expect advice.
+          Upload a photo of your plant to instantly detect diseases and get expert advice.
         </p>
       </div>
 

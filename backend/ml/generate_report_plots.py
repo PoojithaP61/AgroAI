@@ -95,30 +95,14 @@ def generate_visualizations():
             from PIL import Image
             img = Image.open(image_path).convert("RGB")
             
-            # --- START TTA (Test Time Augmentation) ---
-            # Replicating logic from classifier.py to match high accuracy (88%+)
-            # OPTIMIZED: Batch all valid views together
+            # --- STANDARD DETERMINISTIC INFERENCE ---
+            # Use single view (Center Crop) to match final_evaluate.py exactly
+            img_tensor = inference_transform(img).unsqueeze(0).to(device)
             
-            views = []
-            
-            # 1. Standard View
-            views.append(inference_transform(img))
-            
-            # 2. Augmented Views (Reduced to 4 for faster report generation, usually sufficient)
-            for _ in range(4):
-                views.append(train_transform(img))
-            
-            # Stack into a batch: (20, 3, 224, 224)
-            batch_input = torch.stack(views).to(device)
-            
-            # Batch Inference
-            batch_embeddings = classifier.model(batch_input)
-            
-            # Average embeddings
-            # (20, emb_dim) -> (emb_dim) -> (1, emb_dim)
-            embedding = batch_embeddings.mean(dim=0).unsqueeze(0)
-            embedding = F.normalize(embedding, dim=1) 
-            # --- END TTA ---
+            # Inference
+            embedding = classifier.model(img_tensor)
+            embedding = F.normalize(embedding, dim=1)
+            # ----------------------------------------
             
             # Compute cosine similarity with all prototypes
             # (1, Emb_dim) @ (Emb_dim, N_classes) -> (1, N_classes)
@@ -168,7 +152,7 @@ def generate_visualizations():
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
     fig, ax = plt.subplots(figsize=(12, 12))
     disp.plot(ax=ax, cmap='Blues', xticks_rotation='vertical')
-    plt.title("Fig. X. Confusion Matrix for Disease Classification")
+    plt.title("Confusion Matrix for Disease Classification")
     plt.tight_layout()
     plt.savefig(os.path.join(project_root, "confusion_matrix_report.png"))
     print("Saved confusion_matrix_report.png")
@@ -216,7 +200,7 @@ def generate_visualizations():
 
     # -- PLOT 4: MODEL COMPARISON --
     print("\n[3/5] Generating Model Comparison Bar Chart...")
-    models = ['Baseline CNN', 'AgroAI (Yours)']
+    models = ['Baseline CNN', 'AgroAI']
     accuracies = [65.0, acc * 100] # Use calculated accuracy
     
     plt.figure(figsize=(8, 6))
@@ -240,7 +224,7 @@ def generate_visualizations():
     if os.path.exists(target_dir):
         files = os.listdir(target_dir)
         if files:
-            img_name = files[0] # Pick first
+            img_name = files[3] # Pick fourth image for variety
             img_path = os.path.join(target_dir, img_name)
             print(f"Using image: {img_path}")
             
@@ -272,8 +256,28 @@ def generate_visualizations():
                 cam_result = cam_result / np.max(cam_result)
                 cam_result = np.uint8(255 * cam_result)
                 
-                cv2.imwrite(os.path.join(project_root, "gradcam_report.png"), cam_result)
-                print("Saved gradcam_report.png")
+                # Create side-by-side comparison (Original | GradCAM)
+                orig_cv = np.uint8(orig_cv)
+                
+                # Stack images horizontally
+                h_img, w_img, _ = orig_cv.shape
+                combined_imgs = np.hstack((orig_cv, cam_result))
+                
+                # Create a blank header for text
+                header_height = 30
+                header = np.zeros((header_height, combined_imgs.shape[1], 3), dtype=np.uint8) + 255 # White background
+                
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                
+                # Write "Original" and "Grad-CAM" labels
+                cv2.putText(header, "Original", (int(w_img/2) - 30, 20), font, 0.5, (50, 50, 50), 1)
+                cv2.putText(header, "Grad-CAM", (int(w_img + w_img/2) - 35, 20), font, 0.5, (50, 50, 50), 1)
+                
+                # Combine header and images
+                final_combined = np.vstack((header, combined_imgs))
+                
+                cv2.imwrite(os.path.join(project_root, "gradcam_result.png"), final_combined)
+                print("Saved gradcam_result.png (Side-by-Side Comparison with Labels, No Name)")
             else:
                  print(f"Target class {target_class} not found in model classes.")
         else:
@@ -328,11 +332,6 @@ def generate_visualizations():
     # Sort classes for clean heatmap
     sorted_indices = np.argsort(class_names)
     start_names = [class_names[i] for i in sorted_indices]
-    
-    # helper to get protoname by index
-    # We need to stack them in the sorted order
-    # Prototypes dict keys are original indices
-    
     sorted_proto_list = []
     
     # Handle potentially missing keys if any (though we checked before)

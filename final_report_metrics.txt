@@ -1,9 +1,9 @@
 AgroAI Model Evaluation Report
 ==============================
-Accuracy:  85.67%
-Precision: 86.32%
-Recall:    85.67%
-F1-score:  85.56%
+Accuracy:  92.00%
+Precision: 92.17%
+Recall:    92.00%
+F1-score:  91.74%
 
 Methodology:
 - Model: MobileNetV3 (Fine-tuned)

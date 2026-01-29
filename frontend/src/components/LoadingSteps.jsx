@@ -12,8 +12,8 @@ export default function LoadingSteps({ currentStep }) {
     // We use currentStep (1-4) to control the visual state
 
     return (
-        <div className="w-full max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg border border-emerald-100">
-            <h3 className="text-lg font-semibold text-center text-gray-800 mb-6">Processing Analysis</h3>
+        <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-emerald-100 dark:border-gray-700 transition-colors duration-300">
+            <h3 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100 mb-6">Processing Analysis</h3>
 
             <div className="space-y-4">
                 {steps.map((step) => {
@@ -27,8 +27,8 @@ export default function LoadingSteps({ currentStep }) {
                                 className={`
                   flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full border-2 transition-all duration-300
                   ${isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' : ''}
-                  ${isCurrent ? 'border-emerald-500 text-emerald-500' : ''}
-                  ${isPending ? 'border-gray-200 text-gray-300' : ''}
+                  ${isCurrent ? 'border-emerald-500 text-emerald-500 dark:text-emerald-400' : ''}
+                  ${isPending ? 'border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-500' : ''}
                 `}
                             >
                                 {isCompleted ? (
@@ -44,9 +44,9 @@ export default function LoadingSteps({ currentStep }) {
                                 <p
                                     className={`
                     text-sm font-medium transition-colors duration-300
-                    ${isCompleted ? 'text-gray-900' : ''}
-                    ${isCurrent ? 'text-emerald-700 font-bold' : ''}
-                    ${isPending ? 'text-gray-400' : ''}
+                    ${isCompleted ? 'text-gray-900 dark:text-gray-200' : ''}
+                    ${isCurrent ? 'text-emerald-700 dark:text-emerald-400 font-bold' : ''}
+                    ${isPending ? 'text-gray-400 dark:text-gray-500' : ''}
                   `}
                                 >
                                     {step.label}

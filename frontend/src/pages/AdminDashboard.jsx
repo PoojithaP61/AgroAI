@@ -159,12 +159,8 @@ export default function AdminDashboard() {
                     <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8">
                         <div className="mb-8">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <Plus className="w-6 h-6 text-primary-500" />
                                 Train New Disease
                             </h2>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">
-                                Add a new disease class to the model dynamically. No downtime required.
-                            </p>
                         </div>
 
                         <form onSubmit={handleTrain} className="space-y-6">
@@ -176,7 +172,6 @@ export default function AdminDashboard() {
                                     type="text"
                                     value={diseaseName}
                                     onChange={(e) => setDiseaseName(e.target.value)}
-                                    placeholder="e.g. Tomato Early Blight"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
                                 />
                             </div>
@@ -198,9 +193,6 @@ export default function AdminDashboard() {
                                         <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
                                         <p className="text-gray-900 dark:text-white font-medium mb-1">
                                             {files.length > 0 ? `${files.length} images selected` : 'Click to upload images'}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            Recommended: 5-20 distinct images
                                         </p>
                                     </label>
                                 </div>
@@ -328,13 +320,10 @@ const ReportedCasesList = ({ reports }) => {
                         <div className="flex justify-between items-start">
                             <div>
                                 <h3 className="font-bold text-lg text-gray-900 dark:text-white">
-                                    Proposed: {report.proposed_label || "No Label Proposed"}
+                                    {report.proposed_label ? `Proposed: ${report.proposed_label}` : "Unknown Disease Reported"}
                                 </h3>
                                 <p className="text-sm text-gray-500">Reported on {new Date(report.created_at).toLocaleDateString()}</p>
                             </div>
-                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">
-                                {report.status}
-                            </span>
                         </div>
 
                         <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">

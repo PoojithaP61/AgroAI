@@ -46,7 +46,6 @@ def fine_tune():
 
     print("Loading Encoder...")
     model = Encoder(embedding_dim=256)
-    # Always try to load prev best weights to continue improving
     if os.path.exists(encoder_path):
         try:
             model.load_state_dict(torch.load(encoder_path, map_location=device))
@@ -66,7 +65,6 @@ def fine_tune():
         list(model.parameters()) + list(projection_head.parameters()), 
         lr=0.0001
     )
-    # Add Cosine Annealing Scheduler
     EPOCHS = 200
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
 
@@ -77,11 +75,9 @@ def fine_tune():
     for epoch in range(EPOCHS):
         running_loss = 0.0        
         for images, labels in dataloader:
-            # Stack 2 views of the same image: (2*B, C, H, W)
             images = torch.cat([images[0], images[1]], dim=0)
             images = images.to(device)
             labels = labels.to(device)
-            # Duplicate labels for the second view
             labels = torch.cat([labels, labels], dim=0)
 
             optimizer.zero_grad()

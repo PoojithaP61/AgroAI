@@ -18,7 +18,7 @@ class Settings:
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024
     ALLOWED_EXTENSIONS: set = {".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG"}
     GRADCAM_OUTPUT_DIR: str = os.getenv("GRADCAM_OUTPUT_DIR", "data/processed/gradcam")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
     DEVICE: str = os.getenv("DEVICE", "cpu")
     CORS_ORIGINS: list = [

@@ -15,7 +15,7 @@ export default function AIAdvisoryCard({ advisory, loading }) {
     if (!advisory) return null
 
     return (
-        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-xl shadow-lg border border-indigo-100 dark:border-indigo-900 p-6">
+        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-800 rounded-xl shadow-lg border border-indigo-100 dark:border-gray-700 p-6">
             {/* Decorative background elements */}
             <div className="absolute top-0 right-0 -mr-10 -mt-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
@@ -28,7 +28,7 @@ export default function AIAdvisoryCard({ advisory, loading }) {
                     </h3>
                 </div>
 
-                <div className="prose prose-indigo dark:prose-invert max-w-none prose-headings:font-bold prose-headings:text-indigo-900 dark:prose-headings:text-indigo-100 prose-p:text-indigo-900/80 dark:prose-p:text-indigo-100/80 prose-li:text-indigo-900/80 dark:prose-li:text-indigo-100/80 prose-strong:text-indigo-900 dark:prose-strong:text-indigo-100">
+                <div className="prose prose-indigo dark:prose-invert max-w-none prose-headings:font-bold prose-headings:text-indigo-900 dark:prose-headings:text-white prose-p:text-indigo-900/80 dark:prose-p:text-gray-100 prose-li:text-indigo-900/80 dark:prose-li:text-gray-100 prose-strong:text-indigo-900 dark:prose-strong:text-white">
                     <ReactMarkdown>
                         {advisory}
                     </ReactMarkdown>
