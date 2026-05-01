@@ -1,11 +1,22 @@
-AgroAI Model Evaluation Report
-==============================
-Accuracy:  92.00%
-Precision: 92.17%
-Recall:    92.00%
-F1-score:  91.74%
+Accuracy: 92.00%
+Precision: 91.83%
+Recall: 92.00%
+F1_Score: 91.76%
 
-Methodology:
-- Model: MobileNetV3 (Fine-tuned)
-- Technique: Supervised Contrastive Learning (SupCon) + Few-Shot Prototypical Networks
-- Inference: Test Time Augmentation (5 views)
+Classification Report:
+                            precision    recall  f1-score   support
+
+Pepper_Bell_Bacterial_Spot     1.0000    1.0000    1.0000         5
+       Pepper_Bell_Healthy     1.0000    1.0000    1.0000         5
+       Potato_Early_Blight     0.8000    0.8000    0.8000         5
+            Potato_Healthy     0.8333    1.0000    0.9091         5
+        Potato_Late_Blight     1.0000    1.0000    1.0000         5
+     Tomato_Bacterial_Spot     1.0000    1.0000    1.0000         5
+       Tomato_Early_Blight     0.8000    0.8000    0.8000         5
+            Tomato_Healthy     1.0000    1.0000    1.0000         5
+        Tomato_Late_Blight     0.7500    0.6000    0.6667         5
+          Tomato_Leaf_Mold     1.0000    1.0000    1.0000         5
+
+                  accuracy                         0.9200        50
+                 macro avg     0.9183    0.9200    0.9176        50
+              weighted avg     0.9183    0.9200    0.9176        50

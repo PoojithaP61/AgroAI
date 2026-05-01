@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Calendar, Eye, AlertTriangle, CheckCircle, Search, Filter } from 'lucide-react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function History() {
   const [predictions, setPredictions] = useState([])
@@ -10,6 +11,7 @@ export default function History() {
   const [showFilters, setShowFilters] = useState(false)
   const [filterStatus, setFilterStatus] = useState('all') // all, healthy, diseased, unknown
   const [sortBy, setSortBy] = useState('newest') // newest, oldest
+  const { t } = useLanguage()
 
   useEffect(() => {
     fetchHistory()

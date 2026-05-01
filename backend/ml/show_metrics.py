@@ -98,7 +98,18 @@ def show_metrics():
     print(f"F1 Score:  {f1*100:.2f}%")
     print("="*30)
     print("\nDetailed Classification Report:")
-    print(classification_report(y_true, y_pred, target_names=class_names, digits=4))
+    report = classification_report(y_true, y_pred, target_names=class_names, digits=4)
+    print(report)
+
+    # Save metrics for report generation
+    with open(os.path.join(project_root, "final_report_metrics.txt"), "w") as f:
+        f.write(f"Accuracy: {acc*100:.2f}%\n")
+        f.write(f"Precision: {prec*100:.2f}%\n")
+        f.write(f"Recall: {rec*100:.2f}%\n")
+        f.write(f"F1_Score: {f1*100:.2f}%\n")
+        f.write("\nClassification Report:\n")
+        f.write(report)
+    print(f"\nSaved metrics to {os.path.join(project_root, 'final_report_metrics.txt')}")
 
 if __name__ == "__main__":
     show_metrics()

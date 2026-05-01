@@ -7,7 +7,7 @@ import { useLanguage, LANGUAGES } from '../contexts/LanguageContext'
 
 export default function Layout() {
   const { user, logout } = useAuth()
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
   const location = useLocation()
 
   const handleLogout = () => {
@@ -111,12 +111,12 @@ export default function Layout() {
             </div>
           </div>
         </div>
-      </nav>
+      </nav >
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
+      < main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500" >
         <Outlet />
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }

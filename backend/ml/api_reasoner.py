@@ -100,7 +100,7 @@ def translate_text(text: str, target_language: str) -> str:
             messages=[
                 {
                     "role": "system", 
-                    "content": "You are a professional translator. Output only the translation."
+                    "content": "You are a professional translator. Output only the translation. Maintain the same formatting (markdown, lines) as the original."
                 },
                 {
                     "role": "user", 
@@ -108,7 +108,8 @@ def translate_text(text: str, target_language: str) -> str:
                 }
             ],
             model=MODEL_NAME,
-            temperature=0.3
+            temperature=0.3,
+            max_tokens=4096
         )
         return chat_completion.choices[0].message.content.strip()
     except Exception as e:
@@ -123,31 +124,55 @@ def translate_batch(texts: dict[str, str], target_language: str) -> dict[str, st
         return texts
         
     try:
-        prompt = (
-            f"Translate the values of the following JSON dictionary to {target_language}. "
-            f"Return ONLY the valid JSON with the same keys and translated values. "
-            f"Do not include markdown code blocks (```json ... ```), just the raw JSON string.\n\n"
-            f"{json.dumps(texts, ensure_ascii=False)}"
-        )
-
-        chat_completion = client.chat.completions.create(
-             messages=[
-                {
-                    "role": "system", 
-                    "content": "You are a translator API. Output only valid JSON."
-                },
-                {
-                    "role": "user", 
-                    "content": prompt
-                }
-            ],
-            model=MODEL_NAME,
-            temperature=0.3,
-            response_format={"type": "json_object"}
-        )
+        advisory_to_translate = texts.pop('ai_advisory', None)
         
-        result = chat_completion.choices[0].message.content
-        return json.loads(result)
+        translated_results = {}
+        
+        if texts:
+            prompt = (
+                f"Translate the values of the following JSON dictionary to {target_language}. "
+                f"Return ONLY the valid JSON with the same keys and translated values. "
+                f"{json.dumps(texts, ensure_ascii=False)}"
+            )
+
+            chat_completion = client.chat.completions.create(
+                 messages=[
+                    {"role": "system", "content": "You are a translator API. Output only valid JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                model=MODEL_NAME,
+                temperature=0.3,
+                max_tokens=2048,
+                response_format={"type": "json_object"}
+            )
+            
+            meta_result = chat_completion.choices[0].message.content.strip()
+            translated_results.update(json.loads(meta_result))
+
+        if advisory_to_translate:
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": f"Translate this agricultural advisory to {target_language}. Keep markdown formatting. Output ONLY translation."},
+                    {"role": "user", "content": advisory_to_translate}
+                ],
+                model=MODEL_NAME,
+                temperature=0.3,
+                max_tokens=3500
+            )
+            translated_results['ai_advisory'] = chat_completion.choices[0].message.content.strip()
+        
+        for k, v in texts.items():
+            if k not in translated_results:
+                translated_results[k] = v
+        if advisory_to_translate and 'ai_advisory' not in translated_results:
+            translated_results['ai_advisory'] = advisory_to_translate
+
+        return translated_results
+
     except Exception as e:
         logger.error(f"Error in batch translation: {e}")
-        return texts
+        # Build fallback
+        fallback = texts.copy()
+        if 'ai_advisory' in locals() and advisory_to_translate:
+            fallback['ai_advisory'] = advisory_to_translate
+        return fallback

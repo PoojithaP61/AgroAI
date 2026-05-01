@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
 import LoadingSteps from '../components/LoadingSteps'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Dashboard() {
   const [file, setFile] = useState(null)
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const onDrop = useCallback((acceptedFiles) => {
     const selectedFile = acceptedFiles[0]

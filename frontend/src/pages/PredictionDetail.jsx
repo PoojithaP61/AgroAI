@@ -15,7 +15,7 @@ export default function PredictionDetail() {
   const [imageUrl, setImageUrl] = useState(null)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
 
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [translatedContent, setTranslatedContent] = useState({})
   const [isTranslating, setIsTranslating] = useState(false)
 
@@ -105,9 +105,9 @@ export default function PredictionDetail() {
   }
 
   const getConfidenceLevel = (score) => {
-    if (score > 0.9) return { label: 'High Confidence', color: 'text-green-600 dark:text-green-400' }
-    if (score > 0.7) return { label: 'Moderate Confidence', color: 'text-yellow-600 dark:text-yellow-400' }
-    return { label: 'Low Confidence', color: 'text-red-600 dark:text-red-400' }
+    if (score > 0.9) return { label: t('confidence') + ': ' + t('high'), color: 'text-green-600 dark:text-green-400' }
+    if (score > 0.7) return { label: t('confidence') + ': ' + t('moderate'), color: 'text-yellow-600 dark:text-yellow-400' }
+    return { label: t('confidence') + ': ' + t('low'), color: 'text-red-600 dark:text-red-400' }
   }
 
   if (loading) {
@@ -145,7 +145,7 @@ export default function PredictionDetail() {
         className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span className="font-medium">Back to History</span>
+        <span className="font-medium">{t('back_to_history')}</span>
       </Link>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -183,7 +183,7 @@ export default function PredictionDetail() {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Original Image */}
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Analyzed Image</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('analyzed_image')}</p>
                   <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-inner">
                     {imageUrl ? (
                       <img
@@ -202,7 +202,7 @@ export default function PredictionDetail() {
                 {/* Grad-CAM */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Heatmap Analysis</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('heatmap_analysis')}</p>
                     {prediction.cam_coverage > 0 && (
                       <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full">
                         {Math.round(prediction.cam_coverage * 100)}% Coverage
@@ -242,12 +242,12 @@ export default function PredictionDetail() {
             ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
             : 'bg-white dark:bg-dark-surface border-gray-100 dark:border-gray-700 shadow-sm'
             }`}>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Diagnosis Status</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t('diagnosis_status')}</h2>
 
             {prediction.is_unknown ? (
               <div className="text-center py-4">
                 <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-                <h3 className="text-xl font-bold text-yellow-700 dark:text-yellow-400 mb-2">Unknown Disease</h3>
+                <h3 className="text-xl font-bold text-yellow-700 dark:text-yellow-400 mb-2">{t('unknown_disease')}</h3>
                 <p className="text-yellow-600 dark:text-yellow-300/80 text-sm mb-4">
                   Our confidence score was too low to verify the disease. Please consult an expert.
                 </p>
@@ -262,7 +262,7 @@ export default function PredictionDetail() {
             ) : (
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Detected Pathogen</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('detected_pathogen')}</p>
                   <p className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     {displayData.disease_name}
                     <CheckCircle className="w-5 h-5 text-green-500" />
@@ -271,13 +271,13 @@ export default function PredictionDetail() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Severity</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('severity')}</p>
                     <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${getStageColor(prediction.disease_stage)}`}>
                       {displayData.disease_stage}
                     </span>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Impact</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('impact')}</p>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">{displayData.estimated_yield_loss}</p>
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export default function PredictionDetail() {
                 {/* Only show recommendation if NOT healthy */}
                 {!prediction.disease_name.toLowerCase().includes('healthy') && (
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Recommended Action</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('recommended_action')}</p>
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
                       <p className="text-blue-800 dark:text-blue-300 font-medium text-sm">
                         {displayData.recommended_action}
@@ -297,7 +297,7 @@ export default function PredictionDetail() {
                 {prediction.disease_name.toLowerCase().includes('healthy') && (
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-lg">
                     <p className="text-green-800 dark:text-green-300 font-medium text-sm text-center">
-                      🎉 Plant is healthy! No action needed.
+                      {t('healthy_msg')}
                     </p>
                   </div>
                 )}
@@ -309,7 +309,7 @@ export default function PredictionDetail() {
                     className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 mx-auto transition-colors"
                   >
                     <Flag className="w-3 h-3" />
-                    Report Incorrect Diagnosis
+                    {t('report_incorrect')}
                   </button>
                 </div>
               </div>
@@ -319,7 +319,7 @@ export default function PredictionDetail() {
           {/* Metadata Card - Only Notes */}
           {prediction.notes && (
             <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Field Notes</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t('field_notes')}</h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <FileText className="w-5 h-5 text-gray-400 mt-0.5" />

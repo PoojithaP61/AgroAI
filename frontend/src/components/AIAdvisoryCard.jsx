@@ -1,6 +1,8 @@
 import ReactMarkdown from 'react-markdown'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function AIAdvisoryCard({ advisory, loading }) {
+    const { t } = useLanguage()
     if (loading) {
         return (
             <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 animate-pulse">
@@ -33,8 +35,6 @@ export default function AIAdvisoryCard({ advisory, loading }) {
                         {advisory}
                     </ReactMarkdown>
                 </div>
-
-
             </div>
         </div>
     )

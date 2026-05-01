@@ -21,7 +21,16 @@ class PrototypeClassifier:
 
         self.class_names = class_names
 
-    def predict(self, image_path, threshold=0.6):
+    def predict(self, image_path, threshold=0.6, margin_threshold: float = 0.0):
+        """
+        Predict class name using prototype cosine similarity.
+
+        Open-set rejection:
+        - reject if best_score < threshold
+        - optionally reject if (best_score - second_best_score) < margin_threshold
+
+        NOTE: margin_threshold defaults to 0.0 (disabled) to avoid impacting closed-set metrics.
+        """
         from backend.ml.transforms import train_transform
         image = Image.open(image_path).convert("RGB")
         embeddings = []
@@ -47,10 +56,18 @@ class PrototypeClassifier:
 
         print(f"DEBUG: Best Class: {self.class_names[best_label]} | Score: {best_score:.4f} | Threshold: {threshold:.4f}")
 
+        # Open-set rejection by absolute threshold
         if best_score < threshold:
             print(f"DEBUG: Rejected as UNKNOWN (Score {best_score:.4f} < {threshold:.4f})")
             return "UNKNOWN", float(best_score)
 
         sorted_scores = sorted(similarities.values(), reverse=True)
+
+        # Optional open-set rejection by margin (disabled by default)
+        if margin_threshold > 0 and len(sorted_scores) >= 2:
+            margin = sorted_scores[0] - sorted_scores[1]
+            if margin < margin_threshold:
+                print(f"DEBUG: Rejected as UNKNOWN by margin (margin {margin:.4f} < {margin_threshold:.4f})")
+                return "UNKNOWN", float(best_score)
 
         return self.class_names[best_label], float(best_score)

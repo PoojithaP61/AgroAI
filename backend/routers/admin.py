@@ -25,7 +25,6 @@ class DiseaseStats(BaseModel):
     early_stage_count: int
     mid_stage_count: int
     late_stage_count: int
-    late_stage_count: int
 
 
 class UserInfo(BaseModel):
@@ -279,11 +278,6 @@ async def train_new_disease(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Training failed: {str(e)}")
 
-    return {
-        "message": f"Successfully trained new disease: {safe_name}",
-        "images_added": saved_count,
-        "total_classes": len(ml_service.class_names)
-    }
     return {
         "message": f"Successfully trained new disease: {safe_name}",
         "images_added": saved_count,

@@ -42,25 +42,35 @@ class MLService:
         if not os.path.exists(train_dir):
             raise FileNotFoundError(f"Training data directory not found at {train_dir}")
         
-        self.threshold = compute_open_set_threshold(
-            encoder_path, train_dir, self.device, percentile=0.5
-        )
-        print(f"Open-set threshold: {self.threshold:.3f}")
+        # Use static threshold if provided in settings, otherwise compute it
+        env_threshold = os.getenv("OPEN_SET_THRESHOLD")
+        if env_threshold is not None:
+            self.threshold = float(env_threshold)
+            print(f"Using fixed open-set threshold from env: {self.threshold:.3f}")
+        else:
+            # Keep percentile default as-is unless overridden by env var to avoid changing expected behavior.
+            percentile = float(os.getenv("OPEN_SET_PERCENTILE", "0.5"))
+            tta_samples = int(os.getenv("OPEN_SET_TTA_SAMPLES", "20"))
+            self.threshold = compute_open_set_threshold(
+                encoder_path, train_dir, self.device, percentile=percentile, tta_samples=tta_samples
+            )
+            print(f"Open-set threshold: {self.threshold:.3f}")
         
         self.prototypes, self.class_names = compute_prototypes(
             encoder_path, train_dir, self.device
         )
-        print(f"Loaded {len(self.class_names)} disease classes")
+        # Format class names to be more readable
+        self.class_names = [self._format_class_name(name) for name in self.class_names]
         
         self.classifier = PrototypeClassifier(
             encoder_path, self.prototypes, self.class_names, self.device
         )
-        
+
     def get_classifier(self) -> PrototypeClassifier:
         if self.classifier is None:
             self.initialize()
         return self.classifier
-    
+
     def get_threshold(self) -> float:
         if self.threshold is None:
             self.initialize()
@@ -70,13 +80,36 @@ class MLService:
         self.classifier = None
         encoder_path = settings.ENCODER_PATH
         train_dir = settings.TRAIN_DATA_DIR
+
+        env_threshold = os.getenv("OPEN_SET_THRESHOLD")
+        if env_threshold is not None:
+            self.threshold = float(env_threshold)
+            print(f"Recomputed open-set threshold: {self.threshold:.3f} (from env)")
+        else:
+            percentile = float(os.getenv("OPEN_SET_PERCENTILE", "0.5"))
+            tta_samples = int(os.getenv("OPEN_SET_TTA_SAMPLES", "20"))
+            self.threshold = compute_open_set_threshold(
+                encoder_path, train_dir, self.device, percentile=percentile, tta_samples=tta_samples
+            )
+            print(f"Recomputed open-set threshold: {self.threshold:.3f}")
+
         self.prototypes, self.class_names = compute_prototypes(
             encoder_path, train_dir, self.device
         )
+        # Format class names to be more readable
+        self.class_names = [self._format_class_name(name) for name in self.class_names]
         print(f"Reloaded {len(self.class_names)} disease classes")
         
         self.classifier = PrototypeClassifier(
             encoder_path, self.prototypes, self.class_names, self.device
         )
+    
+    def _format_class_name(self, name):
+        """Format class name to be more readable."""
+        # Replace underscores with spaces
+        formatted = name.replace('_', ' ')
+        # Capitalize each word
+        formatted = ' '.join(word.capitalize() for word in formatted.split())
+        return formatted
 
 ml_service = MLService()
